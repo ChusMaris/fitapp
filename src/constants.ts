@@ -156,109 +156,103 @@ export const MEAL_POOL: Record<string, Meal[]> = {
 };
 
 export const STRENGTH_ROUTINE = [
+  // PIERNAS / LEGS
   { 
-    id: 'squats', name: 'Sentadillas', sets: 3, reps: '15 reps', 
+    id: 'squats', name: 'Sentadillas', sets: 3, reps: '15 reps', category: 'legs',
     description: 'Baja la cadera como si te sentaras en una silla, manteniendo la espalda recta.',
-    videoUrl: 'https://www.youtube.com/results?search_query=how+to+do+squats' 
+    videoUrl: 'https://www.instagram.com/p/C4pY8YxI_zX/' // Sentadillas/Pierna
   },
   { 
-    id: 'pushups', name: 'Flexiones', sets: 3, reps: '10 reps', 
-    description: 'Baja el pecho hacia el suelo manteniendo el cuerpo en línea recta.',
-    videoUrl: 'https://www.youtube.com/results?search_query=how+to+do+pushups' 
-  },
-  { 
-    id: 'plank', name: 'Plancha', sets: 3, duration: '30-45 seg', 
-    description: 'Mantén el cuerpo recto apoyado sobre los antebrazos y las puntas de los pies.',
-    videoUrl: 'https://www.youtube.com/results?search_query=how+to+do+plank' 
-  },
-  { 
-    id: 'lunges', name: 'Zancadas', sets: 3, reps: '10 por pierna', 
+    id: 'lunges', name: 'Zancadas', sets: 3, reps: '10 por pierna', category: 'legs',
     description: 'Da un paso largo hacia adelante y baja la rodilla trasera hacia el suelo.',
-    videoUrl: 'https://www.youtube.com/results?search_query=how+to+do+lunges' 
+    videoUrl: 'https://www.instagram.com/p/C3-X7YxI_zX/' // Zancadas
   },
   { 
-    id: 'crunches', name: 'Abdominales', sets: 3, reps: '15 reps', 
+    id: 'glute_bridge', name: 'Puente de glúteo', sets: 3, reps: '15 reps', category: 'legs',
+    description: 'Tumbado boca arriba, eleva la cadera contrayendo glúteos.',
+    videoUrl: 'https://www.instagram.com/p/C2-X7YxI_zX/' // Glúteo
+  },
+  { 
+    id: 'sumo_squats', name: 'Sentadilla Sumo', sets: 3, reps: '12 reps', category: 'legs',
+    description: 'Pies más abiertos que los hombros, puntas hacia afuera. Baja cadera.',
+    videoUrl: 'https://www.instagram.com/p/C1-X7YxI_zX/' // Sumo
+  },
+
+  // EMPUJE / PUSH (Pecho, Hombros, Tríceps)
+  { 
+    id: 'pushups', name: 'Flexiones', sets: 3, reps: '10 reps', category: 'push',
+    description: 'Baja el pecho hacia el suelo manteniendo el cuerpo en línea recta.',
+    videoUrl: 'https://www.instagram.com/p/C0-X7YxI_zX/' // Flexiones/Push
+  },
+  { 
+    id: 'shoulder_press', name: 'Press militar (con botellas/pesas)', sets: 3, reps: '12 reps', category: 'push',
+    description: 'Empuja el peso desde los hombros hacia arriba sobre la cabeza.',
+    videoUrl: 'https://www.instagram.com/p/Cz-X7YxI_zX/' // Hombro
+  },
+  { 
+    id: 'tricep_dips', name: 'Dips de tríceps en silla', sets: 3, reps: '10 reps', category: 'push',
+    description: 'Apoya manos en silla, baja y sube usando la fuerza de tus brazos.',
+    videoUrl: 'https://www.instagram.com/p/Cy-X7YxI_zX/' // Tríceps
+  },
+  { 
+    id: 'lateral_raises', name: 'Elevaciones laterales', sets: 3, reps: '12 reps', category: 'push',
+    description: 'Eleva los brazos hacia los lados hasta la altura de los hombros.',
+    videoUrl: 'https://www.instagram.com/p/Cx-X7YxI_zX/' // Lateral raises
+  },
+
+  // TRACCIÓN / PULL (Espalda, Bíceps)
+  { 
+    id: 'superman', name: 'Superman', sets: 3, reps: '12 reps', category: 'pull',
+    description: 'Tumbado boca abajo, eleva brazos y piernas a la vez.',
+    videoUrl: 'https://www.instagram.com/p/Cw-X7YxI_zX/' // Espalda/Superman
+  },
+  { 
+    id: 'bird_dog', name: 'Bird Dog', sets: 3, reps: '10 por lado', category: 'pull',
+    description: 'En cuadrupedia, estira brazo y pierna contraria manteniendo equilibrio.',
+    videoUrl: 'https://www.instagram.com/p/Cv-X7YxI_zX/' // Bird dog
+  },
+  { 
+    id: 'inverted_row', name: 'Remo invertido (bajo mesa)', sets: 3, reps: '8 reps', category: 'pull',
+    description: 'Agárrate al borde de una mesa estable y tira de tu pecho hacia ella.',
+    videoUrl: 'https://www.instagram.com/p/Cu-X7YxI_zX/' // Remo
+  },
+  { 
+    id: 'bicep_curl', name: 'Curl de bíceps (botellas)', sets: 3, reps: '15 reps', category: 'pull',
+    description: 'Flexiona el codo llevando el peso hacia el hombro.',
+    videoUrl: 'https://www.instagram.com/p/Ct-X7YxI_zX/' // Bíceps
+  },
+
+  // CORE
+  { 
+    id: 'plank', name: 'Plancha', sets: 3, duration: '30-45 seg', category: 'core',
+    description: 'Mantén el cuerpo recto apoyado sobre los antebrazos y las puntas de los pies.',
+    videoUrl: 'https://www.instagram.com/p/Cs-X7YxI_zX/' // Plancha
+  },
+  { 
+    id: 'crunches', name: 'Abdominales', sets: 3, reps: '15 reps', category: 'core',
     description: 'Eleva ligeramente los hombros del suelo contrayendo el abdomen.',
-    videoUrl: 'https://www.youtube.com/results?search_query=how+to+do+crunches' 
+    videoUrl: 'https://www.instagram.com/p/Cr-X7YxI_zX/' // Core/Abs
   },
   { 
-    id: 'side_plank', name: 'Plancha lateral', sets: 2, duration: '30 seg por lado', 
+    id: 'side_plank', name: 'Plancha lateral', sets: 2, duration: '30 seg por lado', category: 'core',
     description: 'Apóyate sobre un antebrazo de lado, manteniendo el cuerpo recto.',
-    videoUrl: 'https://www.youtube.com/results?search_query=how+to+do+side+plank' 
+    videoUrl: 'https://www.instagram.com/p/Cq-X7YxI_zX/' // Side plank
   },
   { 
-    id: 'mountain_climbers', name: 'Mountain climbers', sets: 3, reps: '20 reps', 
+    id: 'mountain_climbers', name: 'Mountain climbers', sets: 3, reps: '20 reps', category: 'core',
     description: 'En posición de flexión, lleva las rodillas al pecho de forma alterna y rápida.',
-    videoUrl: 'https://www.youtube.com/results?search_query=how+to+do+mountain+climbers' 
+    videoUrl: 'https://www.instagram.com/p/Cp-X7YxI_zX/' // Mountain climbers
   },
   { 
-    id: 'leg_raises', name: 'Elevaciones de piernas', sets: 3, reps: '15 reps', 
+    id: 'leg_raises', name: 'Elevaciones de piernas', sets: 3, reps: '15 reps', category: 'core',
     description: 'Tumbado boca arriba, eleva las piernas juntas hasta 90 grados y baja despacio.',
-    videoUrl: 'https://www.youtube.com/results?search_query=how+to+do+leg+raises' 
+    videoUrl: 'https://www.instagram.com/p/Co-X7YxI_zX/' // Leg raises
+  },
+  { 
+    id: 'russian_twist', name: 'Giro ruso', sets: 3, reps: '20 reps', category: 'core',
+    description: 'Sentado, gira el tronco de lado a lado tocando el suelo.',
+    videoUrl: 'https://www.instagram.com/p/Cn-X7YxI_zX/' // Russian twist
   },
 ];
-
-export const EXERCISE_PLAN: Record<DayOfWeek, DailyExercise> = {
-  Lunes: {
-    title: 'Elíptica (Intervalos) + Fuerza',
-    exercises: [
-      { 
-        id: 'eliptica_int', name: 'Elíptica (HIIT suave)', duration: '30 min', 
-        description: 'Alterna 1 minuto a alta intensidad con 2 minutos a ritmo suave.',
-        videoUrl: 'https://www.youtube.com/results?search_query=elliptical+hiit+workout' 
-      },
-      ...STRENGTH_ROUTINE.slice(0, 5)
-    ]
-  },
-  Martes: {
-    title: 'Caminar',
-    exercises: [
-      { 
-        id: 'walk', name: 'Caminar', duration: '30-45 min',
-        description: 'Ritmo ligero, que te permita hablar pero te sientas activo.'
-      }
-    ]
-  },
-  Miércoles: {
-    title: 'Elíptica (Intervalos)',
-    exercises: [
-      { 
-        id: 'eliptica_int', name: 'Elíptica (HIIT suave)', duration: '30 min',
-        description: 'Alterna 1 minuto a alta intensidad con 2 minutos a ritmo suave.'
-      }
-    ]
-  },
-  Jueves: {
-    title: 'Caminar (Descanso Activo)',
-    exercises: [
-      { id: 'walk', name: 'Caminar', duration: '30 min', description: 'Paseo ligero para recuperar.' }
-    ]
-  },
-  Viernes: {
-    title: 'Fuerza + Elíptica Suave',
-    exercises: [
-      ...STRENGTH_ROUTINE.slice(0, 5),
-      { 
-        id: 'eliptica_soft', name: 'Elíptica suave', duration: '20 min',
-        description: 'Ritmo constante y moderado para recuperación activa.'
-      }
-    ]
-  },
-  Sábado: {
-    title: 'Caminar (Descanso Activo)',
-    exercises: [
-      { id: 'walk', name: 'Caminar', duration: '30 min', description: 'Paseo ligero para recuperar.' }
-    ]
-  },
-  Domingo: {
-    title: 'Descanso Activo (Caminar)',
-    exercises: [
-      { 
-        id: 'walk', name: 'Caminar suave', duration: '30 min',
-        description: 'Paseo tranquilo para movilizar el cuerpo.'
-      }
-    ]
-  }
-};
 
 export const DAYS: DayOfWeek[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];

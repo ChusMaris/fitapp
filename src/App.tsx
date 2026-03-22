@@ -31,8 +31,8 @@ import {
   Activity,
   Trash2
 } from 'lucide-react';
-import { MEAL_POOL, EXERCISE_PLAN, DAYS, STRENGTH_ROUTINE } from './constants';
-import { DayOfWeek, Meal, UserProgress, PadelMatch, UserProfile } from './types';
+import { MEAL_POOL, DAYS, STRENGTH_ROUTINE } from './constants';
+import { DayOfWeek, Meal, UserProgress, PadelMatch, UserProfile, DailyExercise } from './types';
 
 // Helper to adjust quantities based on profile
 const adjustQuantities = (quantities: string, profile?: UserProfile): string => {
@@ -98,6 +98,126 @@ const getMealForDate = (date: Date, type: string, favorites: string[], hasPadel:
   };
 };
 
+// Helper to get a deterministic workout for a date
+const getWorkoutForDate = (date: Date, profile?: UserProfile, padelMatch?: PadelMatch): DailyExercise => {
+  const dStr = date.toISOString().split('T')[0];
+  const dayIndex = date.getDay(); // 0: Sun, 1: Mon, ...
+  const seed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+
+  if (padelMatch) {
+    return {
+      title: `Pádel (${padelMatch.time})`,
+      exercises: [
+        { 
+          id: 'padel', 
+          name: 'Partido de Pádel', 
+          duration: '60-90 min',
+          description: `Partido programado a las ${padelMatch.time}. ¡A por todas!`
+        }
+      ]
+    };
+  }
+
+  // Define a weekly split routine
+  // 1: Push, 2: Cardio, 3: Pull, 4: Cardio, 5: Legs, 6: Full Body/Fun, 0: Rest
+  const splitMap: Record<number, { title: string, categories: string[], cardio?: string }> = {
+    1: { title: 'Empuje (Pecho/Hombro/Tríceps) + Core', categories: ['push', 'core'] },
+    2: { title: 'Cardio: Caminar / Elíptica', categories: [], cardio: 'walk' },
+    3: { title: 'Tracción (Espalda/Bíceps) + Core', categories: ['pull', 'core'] },
+    4: { title: 'Cardio: Caminar / Elíptica', categories: [], cardio: 'walk' },
+    5: { title: 'Pierna Completa + Core', categories: ['legs', 'core'] },
+    6: { title: 'Full Body (Mantenimiento)', categories: ['push', 'pull', 'legs', 'core'] },
+    0: { title: 'Descanso Activo', categories: [], cardio: 'rest' }
+  };
+
+  const plan = splitMap[dayIndex];
+  let exercises: any[] = [];
+
+  if (plan.cardio === 'rest') {
+    return {
+      title: plan.title,
+      exercises: [{ id: 'rest', name: 'Paseo ligero / Estiramientos', duration: '20 min', description: 'Día de recuperación. Mantente activo con un paseo suave.' }]
+    };
+  }
+
+  if (plan.cardio === 'walk') {
+    const isElliptical = seed % 2 === 0;
+    return {
+      title: plan.title,
+      exercises: [
+        isElliptical 
+          ? { id: 'eliptica', name: 'Elíptica (Ritmo constante)', duration: '30 min', description: 'Mantén un ritmo que te permita respirar con control.' }
+          : { id: 'walk', name: 'Caminar a paso ligero', duration: '45 min', description: 'Busca un ritmo activo, como si tuvieras prisa.' }
+      ]
+    };
+  }
+
+  // Strength days
+  plan.categories.forEach(cat => {
+    let catExercises = STRENGTH_ROUTINE.filter(ex => ex.category === cat);
+    
+    // Goal-based prioritization within category
+    if (profile && profile.goals) {
+      const goals = profile.goals.toLowerCase();
+      if (goals.includes('glúteo') || goals.includes('culo') || goals.includes('pierna')) {
+        // Prioritize glute/leg exercises
+        catExercises = [...catExercises].sort((a, b) => {
+          if (a.id === 'glute_bridge' || a.id === 'sumo_squats') return -1;
+          if (b.id === 'glute_bridge' || b.id === 'sumo_squats') return 1;
+          return 0;
+        });
+      }
+      if (goals.includes('brazo') || goals.includes('pecho')) {
+        catExercises = [...catExercises].sort((a, b) => {
+          if (a.id === 'pushups' || a.id === 'tricep_dips' || a.id === 'bicep_curl') return -1;
+          if (b.id === 'pushups' || b.id === 'tricep_dips' || b.id === 'bicep_curl') return 1;
+          return 0;
+        });
+      }
+    }
+
+    // Pick 2-3 exercises per category deterministically
+    const count = cat === 'core' ? 2 : 3;
+    for (let i = 0; i < count; i++) {
+      const ex = catExercises[(seed + i) % catExercises.length];
+      if (ex && !exercises.some(e => e.id === ex.id)) {
+        exercises.push({ ...ex });
+      }
+    }
+  });
+
+  // Goal-based adjustments
+  if (profile) {
+    const goals = (profile.goals || '').toLowerCase();
+    const activity = profile.activityLevel;
+    
+    // If goal is "abdomen/barriga", add one more core exercise if not already many
+    if ((goals.includes('barriga') || goals.includes('abdomen') || goals.includes('grasa')) && plan.categories.includes('core')) {
+      const coreExs = STRENGTH_ROUTINE.filter(ex => ex.category === 'core' && !exercises.some(e => e.id === ex.id));
+      if (coreExs.length > 0) exercises.push(coreExs[seed % coreExs.length]);
+    }
+
+    // Adjust sets/reps
+    exercises = exercises.map(ex => {
+      let s = ex.sets || 3;
+      let r = ex.reps;
+
+      if (activity === 'active') s += 1;
+      if (activity === 'sedentary') s = Math.max(2, s - 1);
+      
+      if (goals.includes('fuerza') || goals.includes('músculo')) {
+        r = '8-10 reps (Carga pesada)';
+      } else if (goals.includes('perder') || goals.includes('definir')) {
+        r = '15-20 reps (Carga ligera, más ritmo)';
+      }
+
+      return { ...ex, sets: s, reps: r };
+    });
+  }
+
+  return { title: plan.title, exercises };
+};
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<'diet' | 'exercise' | 'progress' | 'shopping' | 'profile'>('diet');
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -157,13 +277,6 @@ export default function App() {
     };
   }, [currentDate, progress.favorites, hasPadelToday, progress.profile]);
 
-  const selectedDay = useMemo(() => {
-    const daysMap: Record<number, DayOfWeek> = {
-      1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes', 6: 'Sábado', 0: 'Domingo'
-    };
-    return daysMap[currentDate.getDay()];
-  }, [currentDate]);
-
   const toggleItem = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     const key = `${dateString}-${id}`;
@@ -214,80 +327,16 @@ export default function App() {
   };
 
   const currentExercise = useMemo(() => {
-    const base = EXERCISE_PLAN[selectedDay];
-    let exercises = [...base.exercises];
-
-    // Adjust reps/sets based on profile
-    if (progress.profile) {
-      const { weight, age, activityLevel, goals } = progress.profile;
-      
-      // Goal-based exercise additions
-      if (goals) {
-        const goalsLower = goals.toLowerCase();
-        if (goalsLower.includes('barriga') || goalsLower.includes('abdomen') || goalsLower.includes('grasa')) {
-          // Add core exercises if not present
-          const coreIds = ['plank', 'crunches', 'leg_raises'];
-          coreIds.forEach(id => {
-            if (!exercises.some(ex => ex.id === id)) {
-              const coreEx = STRENGTH_ROUTINE.find(e => e.id === id);
-              if (coreEx) exercises.push({ ...coreEx, name: `${coreEx.name} (Objetivo: Abdomen)` });
-            }
-          });
-        }
-      }
-
-      exercises = exercises.map(ex => {
-        let adjustedSets = ex.sets || 3;
-        let adjustedReps = ex.reps;
-
-        if (weight > 90 && (ex.id === 'squats' || ex.id === 'lunges')) {
-          // Reduce reps for heavy weight to protect knees, maybe add a set
-          adjustedReps = '10 reps (Ajustado por peso)';
-          adjustedSets = (ex.sets || 3) + 1;
-        } else if (activityLevel === 'active') {
-          adjustedSets = (ex.sets || 3) + 1;
-        } else if (activityLevel === 'sedentary') {
-          adjustedSets = Math.max(2, (ex.sets || 3) - 1);
-        }
-
-        return { ...ex, sets: adjustedSets, reps: adjustedReps };
-      });
-    }
-
-    if (hasPadelToday && padelMatchToday) {
-      return {
-        title: `Pádel (${padelMatchToday.time})`,
-        exercises: [
-          { 
-            id: 'padel', 
-            name: 'Partido de Pádel', 
-            duration: '60-90 min',
-            description: `Partido programado a las ${padelMatchToday.time}. ¡A por todas!`
-          }
-        ]
-      };
-    }
-    return { ...base, exercises };
-  }, [selectedDay, hasPadelToday, padelMatchToday, progress.profile]);
+    return getWorkoutForDate(currentDate, progress.profile, padelMatchToday);
+  }, [currentDate, progress.profile, padelMatchToday]);
 
   const getDayProgress = (date: Date) => {
     const dStr = date.toISOString().split('T')[0];
-    const daysMap: Record<number, DayOfWeek> = {
-      1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes', 6: 'Sábado', 0: 'Domingo'
-    };
-    const dayName = daysMap[date.getDay()];
-    
-    const hasPadelOnDate = (progress.padelMatches || []).some(m => m.date === dStr);
     const padelOnDate = (progress.padelMatches || []).find(m => m.date === dStr);
+    const workout = getWorkoutForDate(date, progress.profile, padelOnDate);
 
     const dietItems = ['breakfast', 'midMorning', 'lunch', 'snack', 'dinner'];
-    let exerciseItems: string[] = [];
-    
-    if (hasPadelOnDate) {
-      exerciseItems = ['padel'];
-    } else {
-      exerciseItems = EXERCISE_PLAN[dayName].exercises.map(e => e.id);
-    }
+    const exerciseItems = workout.exercises.map(e => e.id);
     
     const total = dietItems.length + exerciseItems.length;
     const completed = [
@@ -466,7 +515,7 @@ export default function App() {
             <ChevronLeft className="w-5 h-5 text-stone-400" />
           </button>
           <div className="text-center flex flex-col items-center">
-            <p className="text-sm font-bold text-stone-900">{selectedDay}</p>
+            <p className="text-sm font-bold text-stone-900">{DAYS[(currentDate.getDay() + 6) % 7]}</p>
             <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">{formatDate(currentDate)}</p>
             {currentDate.toDateString() !== new Date().toDateString() && (
               <button 
